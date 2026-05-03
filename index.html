@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:sans-serif;font-size:20px;padding:16px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;border-bottom:2px solid #ccc;padding-bottom:12px;margin-bottom:1.5rem}
+.tab-btn{border:1.5px solid #ccc;background:#fff;border-radius:10px;padding:10px 16px;cursor:pointer;transition:all .15s;text-align:center;line-height:1.4;min-width:110px;flex:1}
+.tab-btn.active{border-color:transparent}
+.tab-day{font-size:15px;font-weight:700;display:block;margin-bottom:3px}
+.tab-name{font-size:16px;font-weight:700;display:block;margin-bottom:4px}
+.tab-time{font-size:14px;display:block}
+.panel{display:none;padding:18px;border-radius:12px}
+.panel.visible{display:block}
+.show-header{display:flex;align-items:center;gap:18px;margin-bottom:1.1rem}
+.show-logo-wrap{width:110px;height:110px;border-radius:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.show-logo-img{width:100%;height:100%;object-fit:contain}
+.show-meta h3{font-size:27px;font-weight:800;margin-bottom:4px}
+.show-meta .kor{font-size:16px;opacity:.75}
+.show-meta .nick{font-size:16px;margin-top:4px}
+.ch-line{display:flex;align-items:center;gap:7px;font-size:14px;margin-top:4px;opacity:.8}
+.ch-logo{height:24px;object-fit:contain}
+.sec-title{font-size:21px;font-weight:800;text-transform:uppercase;margin-bottom:11px;padding-bottom:5px;border-bottom:3px solid}
+.sec{margin-bottom:1.2rem}
+.divider{height:1px;margin:.9rem 0}
+.hl-box{font-size:16px;line-height:1.7;border-left:5px solid;border-radius:0 10px 10px 0;padding:11px 15px;margin-bottom:1rem}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem}
+.chip{border-radius:10px;padding:8px 14px}
+.chip-lbl{font-size:13px;margin-bottom:2px;opacity:.7}
+.chip-val{font-weight:700;font-size:17px}
+.chip-sub{font-size:13px;margin-top:2px;line-height:1.5;opacity:.85}
+.tc-badge{display:inline-flex;align-items:center;border-radius:6px;padding:5px 13px;font-size:16px;font-weight:700;margin-bottom:8px}
+.tc-yes{background:#fff3dc;color:#7a4800;border:1px solid #f0a030}
+.tc-no{background:#e6f8dc;color:#3a6800;border:1px solid #74cc00}
+.tc-note{font-size:15px;margin-bottom:10px;line-height:1.65}
+.tc-ex-label{font-size:15px;margin-bottom:12px;font-style:italic}
+.timeline{overflow-x:auto;padding-bottom:8px;margin-bottom:4px}
+.tl-track{display:flex;align-items:flex-start;min-width:max-content;padding-top:8px}
+.tl-item{display:flex;flex-direction:column;align-items:center;min-width:86px}
+.tl-connector{display:flex;align-items:center;padding-top:21px;flex-shrink:0}
+.tl-line{height:2px;width:12px}
+.tl-arrow{font-size:15px;color:#888;line-height:1}
+.tl-node{width:46px;height:46px;border-radius:50%;border:2px solid;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.tl-node.stage,.tl-node.vote{background:#f0f0f0;border-color:#ccc;color:#666}
+.tl-node.crown,.tl-node.grad,.tl-node.continue{color:white}
+.tl-node.expiry{background:#fcebeb;border-color:#f09595;color:#a32d2d}
+.tl-label{font-size:13px;margin-top:5px;text-align:center;line-height:1.4;max-width:84px}
+.tl-sublabel{font-size:12px;font-weight:700;margin-top:2px;text-align:center;line-height:1.3;max-width:84px}
+.tl-fail{font-size:11px;color:#e05050;margin-top:3px;text-align:center;line-height:1.3;max-width:84px}
+.tl-gradnote{font-size:13px;font-weight:800;margin-top:4px;text-align:center;line-height:1.3;max-width:84px}
+.score-list{display:flex;flex-direction:column;gap:8px;margin-bottom:.8rem}
+.score-row{display:flex;align-items:center;gap:8px}
+.sc-names{text-align:right;flex-shrink:0;width:120px}
+.sc-kor{font-size:15px;font-weight:700;display:block}
+.sc-zh{font-size:12px;display:block;opacity:.75}
+.sc-bar-wrap{border-radius:3px;height:9px;overflow:hidden;width:200px;flex-shrink:0}
+.sc-bar{height:100%;border-radius:3px}
+.sc-pct{font-size:16px;font-weight:800;width:40px;text-align:right;flex-shrink:0}
+.sc-pts{font-size:12px;flex-shrink:0;opacity:.7}
+.score-detail{margin-top:.6rem;display:flex;flex-direction:column;gap:4px}
+.sd-row{display:flex;align-items:center;gap:8px;font-size:13px;line-height:1.5;padding:5px 9px;border-radius:6px;border:0.5px solid}
+.sd-name{font-weight:700;flex-shrink:0;width:120px;text-align:right}
+.sd-src{opacity:.85;flex:1}
+.sd-tw{flex-shrink:0;font-size:12px;padding:2px 7px;border-radius:12px;font-weight:600;white-space:nowrap}
+.tw-yes{background:#e6f8dc;color:#3a6800}
+.tw-partial{background:#fff3dc;color:#7a4800}
+.tw-no{background:#fcebeb;color:#a32d2d}
+.vote-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.vote-card{border:0.5px solid;border-radius:10px;padding:12px 14px}
+.vc-title{font-size:17px;font-weight:800;margin-bottom:8px}
+.vc-none{font-size:15px;font-style:italic;opacity:.6}
+.vc-body{display:flex;align-items:center;gap:10px}
+.vc-text{flex:1;min-width:0}
+.vc-app-name{font-size:16px;font-weight:800;margin-bottom:4px}
+.vc-time{font-size:13px;line-height:1.6;opacity:.85}
+.vc-limit{font-size:13px;margin-top:3px;opacity:.85}
+.vc-app-logo{width:80px;height:80px;object-fit:contain;object-position:center;flex-shrink:0;display:block;border-radius:16px}
+.cheer-box{border-radius:12px;border:1.5px solid;overflow:hidden}
+.cheer-hd{padding:12px 15px 10px}
+.cheer-hd-t{font-size:18px;font-weight:800}
+.cheer-hd-s{font-size:14px;margin-top:2px;opacity:.8}
+.cheer-plat{margin:10px 15px 9px}
+.cheer-plat-lbl{font-size:14px;margin-bottom:3px;opacity:.7}
+.cheer-plat-val{font-size:18px;font-weight:800;margin-bottom:5px}
+.cheer-plat-note{font-size:14px;line-height:1.6;opacity:.85}
+.cheer-tips{margin:4px 15px 11px;display:flex;flex-direction:column;gap:7px}
+.cheer-tip{display:flex;gap:9px;font-size:15px;line-height:1.7}
+.cheer-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:9px}
+.cheer-footer{padding:10px 15px;border-top:1px solid;font-size:14px;font-style:italic;line-height:1.6;opacity:.85}
+.tw-box{border-radius:10px;padding:14px}
+.tw-item{display:flex;gap:10px;font-size:15px;line-height:1.7;margin-bottom:5px}
+.tw-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:9px}
+.ch-footer{margin-top:1rem;border-radius:10px;padding:12px 15px;font-size:14px;line-height:1.7;border:0.5px solid;opacity:.85}
+.mnet-note{border-left:4px solid;border-radius:0 10px 10px 0;padding:10px 14px;font-size:15px;margin-bottom:11px;line-height:1.7}
+</style></head><body>
+<div class="tabs" id="tabs"></div>
+<div id="panels"></div>
+<script>
+const L={
+  kbs: "images/kbs.png",
+  mbcm: "images/mbcm.png",
+  mbc: "images/mbc.png",
+  mnet: "images/mnet.png",
+  sbs: "images/sbs.png",
+  sc_logo: "images/show_champion.png",
+  mc_logo: "images/mcountdown.png",
+  mb_logo: "images/musicbank.png",
+  smc_logo: "images/mcountdown.png",
+  ig_logo: "images/inkigayo.png",
+  idol: "images/idolchamp.png",
+  mnetplus: "images/mnetplus.png",
+  fancast: "images/fancast.png",
+  mubeat: "images/mubeat.png",
+  linc: "images/linc.png",
+  higher: "images/higher.png",
+};
+
+const D=[
+{
+  id:'sc',tabName:'冠軍秀',day:'週三',timeKST:'17:00',timeTW:'16:00 台灣',timeNote:'2024/4起改為17時',
+  name:'冠軍秀',kor:'쇼챔피언',nameEn:'Show Champion',nicknames:'粉絲簡稱：쇼챔 / Show Champ',
+  ch:'MBC M',chFull:'頻道：MBC M（有線）｜直播：YouTube ALL THE K-POP',
+  showLogo:'sc_logo',chLogo:'mbcm',
+  color:'#5f9aff',accentColor:'#5f9aff',activeTextColor:'rgba(255,255,255,.95)',
+  panelBg:'#ffde59',panelText:'#1a1200',panelTextSec:'#3a2e00',panelCardBg:'#ffffff',panelBorder:'#c4a800',panelBarBg:'#c4a800',
+  max:'10,000',cand:'每組限1首',absentNote:'無需親自到場，僅憑數據即可得一位',
+  hl:'中小型公司的必爭之地。事前投票佔20%，得票率策略非常重要。評分不完全公開，含金量較有爭議。',
+  triple:'有三冠王畢業制',tripleNote:'歌曲得一位達3次即「三冠王畢業」，不得再參與候補。無候補時間限制。',
+  noStage:'冠軍秀無固定回歸舞台競爭制度，歌曲直接憑音源、銷量及投票數據每週計分。',
+  steps:[
+    {type:'vote',emoji:'🗳️',lbl:'第1週\n事前投票',sub:'5/16(五)20:00\n～5/19(一)14:00',fail:'未達標→當週落選'},
+    {type:'crown',emoji:'1冠',lbl:'',sub:'5/20公布',fail:''},
+    {type:'vote',emoji:'🗳️',lbl:'第2週\n事前投票',sub:'5/23(五)20:00\n～5/26(一)14:00',fail:'未達標→當週落選'},
+    {type:'crown',emoji:'2冠',lbl:'',sub:'5/27公布',fail:''},
+    {type:'vote',emoji:'🗳️',lbl:'第3週\n事前投票',sub:'5/30(五)20:00\n～6/2(一)14:00',fail:'未達標→當週落選'},
+    {type:'grad',emoji:'3冠',lbl:'第3週得一位',sub:'6/3公布',gradNote:'🎉三冠王畢業！',fail:''},
+  ],
+  scores:[
+    {kor:'디지털 음원',zh:'數位音源',p:35,max:3500,src:'Melon / FLO / Bugs / Genie（韓國4大平台）',tw:'no',twLabel:'❌ 需韓國帳號'},
+    {kor:'글로벌 팬 투표',zh:'全球粉絲投票',p:20,max:2000,src:'IDOL CHAMP App（票券制，無每日上限）',tw:'yes',twLabel:'✅ 可直接參與'},
+    {kor:'방송 점수',zh:'放送分數',p:20,max:2000,src:'MBC M 出演（到場才有）',tw:'no',twLabel:'❌ 需到場出演'},
+    {kor:'음반 점수',zh:'專輯銷量',p:15,max:1500,src:'Hanteo Chart',tw:'partial',twLabel:'⚠️ 需特定通路'},
+    {kor:'SNS 점수',zh:'SNS分數',p:10,max:1000,src:'YouTube MV 點閱率',tw:'yes',twLabel:'✅ 刷YT有效'},
+  ],
+  preApp:'IDOL CHAMP',preAppLogo:'idol',preTime:'每週五 20:00 ～ 每週一 14:00 KST',preLimit:'無每日上限（票券制）',liveOn:false,
+  cheerPlatform:'YouTube — ALL THE K-POP 官方頻道',
+  cheerNote:'透過 YouTube「ALL THE K-POP」直播，任何人免費觀看並留言。',
+  cheerTips:[],cheerFooter:'讓偶像和工作人員感受到 VIP 全球的熱情！',
+  tw:['可投票：IDOL CHAMP（票券制，無每日上限）','衝 SNS：猛刷官方 YouTube MV（佔10%）','購買實體專輯：選有 Hanteo 標示通路（佔15%）'],
+},{
+  id:'mc',tabName:'M Countdown',day:'週四',timeKST:'18:00',timeTW:'17:00 台灣',timeNote:'',
+  name:'M Countdown',kor:'엠카운트다운',nameEn:'M Countdown',nicknames:'粉絲簡稱：엠카 / MCD',
+  ch:'Mnet',chFull:'頻道：Mnet（有線）｜直播：Mnet Plus APP + YouTube M COUNTDOWN',
+  showLogo:'mc_logo',chLogo:'mnet',
+  color:'#1f48ff',accentColor:'#1f48ff',activeTextColor:'rgba(255,255,255,.95)',
+  panelBg:'#c2dcff',panelText:'#0a1f6e',panelTextSec:'#2a3a8a',panelCardBg:'#e8f2ff',panelBorder:'#8ab4f0',panelBarBg:'#8ab4f0',
+  max:'11,000',cand:'每組限1首（發行1個月內）',absentNote:'無需到場，數據達標即可得一位',
+  hl:'全球粉絲參與度最高、舞台最華麗。音源佔50%，SNS含TikTok，大勢團間競爭激烈，含金量高。',
+  triple:'有三冠王畢業制',tripleNote:'歌曲得一位達3次即畢業。另，發行超過1個月（4週）即自動退出候補。',
+  noStage:null,
+  steps:[
+    {type:'stage',emoji:'☀️',lbl:'回歸舞台\n（第0週）',sub:'5/21（週四）',fail:''},
+    {type:'vote',emoji:'🗳️',lbl:'第1輪\n事前投票',sub:'5/24(六)\n～5/26(一)',fail:''},
+    {type:'crown',emoji:'1冠',lbl:'第1次競爭\n得一位',sub:'5/28（週四）',fail:'未入前2名→淘汰'},
+    {type:'vote',emoji:'🗳️',lbl:'第2輪\n事前投票',sub:'5/31(六)\n～6/2(一)',fail:''},
+    {type:'crown',emoji:'2冠',lbl:'第2次競爭\n得一位',sub:'6/4（週四）',fail:'未入前2名→淘汰'},
+    {type:'vote',emoji:'🗳️',lbl:'第3輪\n事前投票',sub:'6/7(六)\n～6/9(一)',fail:''},
+    {type:'grad',emoji:'👑',lbl:'三冠王\n畢業！',sub:'6/11（週四）',fail:''},
+    {type:'expiry',emoji:'⚠️',lbl:'1個月到期\n自動退出',sub:'6/18後',fail:''},
+  ],
+  scores:[
+    {kor:'음원 점수',zh:'音源分數',p:50,max:5000,src:'Circle Global K-pop（Melon/Genie/FLO/Vibe/Bugs + Spotify/Apple Music/YT Music/TME）',tw:'partial',twLabel:'⚠️ 國際平台也算分'},
+    {kor:'글로벌 소셜미디어',zh:'全球社群媒體',p:15,max:1500,src:'YouTube MV（1,000點）+ TikTok/Shorts（500點）',tw:'yes',twLabel:'✅ YT+TikTok有效'},
+    {kor:'음반 점수',zh:'專輯銷量',p:15,max:1500,src:'Circle Album Chart',tw:'partial',twLabel:'⚠️ 需特定通路'},
+    {kor:'글로벌 팬 투표',zh:'全球粉絲投票',p:10,max:1000,src:'MNET PLUS App（1台設備=1票）',tw:'yes',twLabel:'✅ 可直接參與'},
+    {kor:'엠넷 방송 점수',zh:'Mnet放送分數',p:10,max:1000,src:'M Countdown 出演 + Mnet MV播出',tw:'no',twLabel:'❌ 需出演Mnet'},
+    {kor:'실시간 투표',zh:'實時投票',p:10,max:1000,src:'MNET PLUS App（現場，前2名才有資格）',tw:'yes',twLabel:'✅ 可直接參與'},
+  ],
+  preApp:'MNET PLUS',preAppLogo:'mnetplus',preTime:'每週六 00:00 ～ 每週一 23:59 KST',preLimit:'每日5票（多台設備可多投）',
+  liveOn:true,liveApp:'MNET PLUS',liveAppLogo:'mnetplus',liveTime:'節目播出現場（僅1票，前2名才有資格）',
+  cheerPlatform:'Mnet Plus APP 直播留言區 + YouTube M COUNTDOWN',
+  cheerNote:'Mnet Plus APP 有專屬聊天室，YouTube「M COUNTDOWN」也可留言，兩處都可應援！',
+  cheerTips:['Mnet Plus APP：在底部留言欄輸入應援訊息','YouTube：同步開啟也留言，觸及更多全球觀眾','APP留言和YouTube留言是兩個獨立系統'],
+  cheerFooter:'讓主持人和偶像在後台看到 VIP 的強大動員力！',
+  tw:['可投票：MNET PLUS（每日5票/每台設備，多台可多投）','衝 SNS：猛刷 YouTube MV + 製作TikTok/Shorts（SNS佔15%！）','購買實體專輯：選有 Circle Chart 標示通路（佔15%）'],
+},{
+  id:'mb',tabName:'音樂銀行',day:'週五',timeKST:'17:00',timeTW:'16:00 台灣',timeNote:'',
+  name:'音樂銀行',kor:'뮤직뱅크',nameEn:'Music Bank',nicknames:'粉絲簡稱：뮤뱅 / 音銀 / MB｜別稱：「銷量銀行」',
+  ch:'KBS2',chFull:'頻道：KBS2（無線）｜直播：YouTube KBS Kpop',
+  showLogo:'mb_logo',chLogo:'kbs',
+  color:'#74cc00',accentColor:'#74cc00',activeTextColor:'rgba(255,255,255,.95)',
+  panelBg:'#000000',panelText:'#ffffff',panelTextSec:'#d0d0d0',panelCardBg:'#1c1c1c',panelBorder:'#444444',panelBarBg:'#3a3a3a',
+  max:'200,000',cand:'每組可入圍兩首',absentNote:'無需到場，但到場演出可獲放送分數',
+  hl:'歷史最悠久，無畢業制可無限次得一位。音源60%但滿分高達20萬分，史上最高得分僅16,281分。',
+  triple:'無畢業制',tripleNote:'無畢業制。歌曲可無限次參與候補並得一位，直到不再入榜為止。',
+  noStage:null,
+  steps:[
+    {type:'stage',emoji:'☀️',lbl:'回歸舞台\n（第0週）',sub:'5/23（週五）',fail:''},
+    {type:'vote',emoji:'🗳️',lbl:'第1輪\n事前投票',sub:'5/19(一)\n～5/21(三)',fail:''},
+    {type:'crown',emoji:'1冠',lbl:'第1次得\n一位',sub:'5/23（週五）',fail:'未達標→繼續累積'},
+    {type:'vote',emoji:'🗳️',lbl:'第2輪\n事前投票',sub:'5/26(一)\n～5/28(三)',fail:''},
+    {type:'crown',emoji:'2冠',lbl:'第2次得\n一位',sub:'5/30（週五）',fail:''},
+    {type:'vote',emoji:'🗳️',lbl:'第3輪\n事前投票',sub:'6/2(一)\n～6/4(三)',fail:''},
+    {type:'crown',emoji:'3冠',lbl:'第3次得\n一位',sub:'6/6（週五）',fail:''},
+    {type:'continue',emoji:'∞',lbl:'無限次\n可繼續',sub:'無畢業制',fail:''},
+  ],
+  scores:[
+    {kor:'디지털 음원',zh:'數位音源',p:60,max:120000,src:'Melon / Bugs / Genie / FLO / Vibe（韓國5大，無國際平台）',tw:'no',twLabel:'❌ 需韓國帳號'},
+    {kor:'방송 횟수',zh:'放送次數',p:20,max:40000,src:'KBS TV + 廣播 + 數位播出（到場演出才有）',tw:'no',twLabel:'❌ 需出演KBS'},
+    {kor:'K-POP 팬 투표',zh:'K-POP粉絲投票',p:10,max:20000,src:'Fancast App（2025/8/29第1262回起）',tw:'yes',twLabel:'✅ 可直接參與'},
+    {kor:'음반 판매',zh:'專輯銷量',p:5,max:10000,src:'Circle Album Chart',tw:'partial',twLabel:'⚠️ 需特定通路'},
+    {kor:'소셜 미디어',zh:'社群媒體',p:5,max:10000,src:'YouTube MV + TikTok（Circle Social 2.0）',tw:'yes',twLabel:'✅ YT+TikTok有效'},
+  ],
+  preApp:'Fancast',preAppLogo:'fancast',preTime:'每週一 11:00 ～ 每週三 11:00 KST',preLimit:'無限制（可多帳號）',liveOn:false,
+  cheerPlatform:'YouTube — KBS Kpop 官方頻道',
+  cheerNote:'透過 YouTube「KBS Kpop」直播，任何人免費觀看並留言。',
+  cheerTips:[],cheerFooter:'KBS 觀眾覆蓋廣，讓更多路人認識到 BIGBANG/太陽的回歸！',
+  tw:['可投票：Fancast App（事前投票無限制）','購買實體專輯：選有 Circle Chart 通路（佔5%）','衝 SNS：YouTube MV + TikTok（佔5%）'],
+},{
+  id:'smc',tabName:'Show!音樂中心',day:'週六',timeKST:'15:15',timeTW:'14:15 台灣',timeNote:'',
+  name:'Show! 音樂中心',kor:'쇼!음악중심',nameEn:'Show! Music Core',nicknames:'粉絲簡稱：음중 / 音中 / Music Core',
+  ch:'MBC',chFull:'頻道：MBC（無線）｜直播：YouTube MBCkpop',
+  showLogo:'smc_logo',chLogo:'mbc',
+  color:'#ffc2e8',accentColor:'#d4569e',activeTextColor:'#8c0055',
+  panelBg:'#c7fae9',panelText:'#003d24',panelTextSec:'#1a5c3a',panelCardBg:'#e8fff5',panelBorder:'#70d4a8',panelBarBg:'#70d4a8',
+  max:'10,000',cand:'每組限1首（2個月內發行）',absentNote:'無需到場，宣傳結束後仍常在此得一位',
+  hl:'評分項目最多元（6大類），含金量相對高。但經常停播且不補播，需注意。',
+  triple:'有三冠王畢業制',tripleNote:'歌曲得一位達3次即畢業。另，發行超過2個月即自動退出候補。',
+  noStage:null,
+  steps:[
+    {type:'stage',emoji:'☀️',lbl:'回歸舞台\n（第0週）',sub:'5/24（週六）',fail:''},
+    {type:'vote',emoji:'🗳️',lbl:'第1輪\n事前投票',sub:'5/20(二)\n～5/22(四)',fail:''},
+    {type:'crown',emoji:'1冠',lbl:'第1次競爭\n得一位',sub:'5/24（週六）',fail:'未入前3名→淘汰'},
+    {type:'vote',emoji:'🗳️',lbl:'第2輪\n事前投票',sub:'5/27(二)\n～5/29(四)',fail:''},
+    {type:'crown',emoji:'2冠',lbl:'第2次競爭\n得一位',sub:'5/31（週六）',fail:'未入前3名→淘汰'},
+    {type:'vote',emoji:'🗳️',lbl:'第3輪\n事前投票',sub:'6/3(二)\n～6/5(四)',fail:''},
+    {type:'grad',emoji:'👑',lbl:'三冠王\n畢業！',sub:'6/7（週六）',fail:''},
+    {type:'expiry',emoji:'⚠️',lbl:'2個月到期\n自動退出',sub:'7/18後',fail:''},
+  ],
+  scores:[
+    {kor:'음원 점수',zh:'音源分數',p:50,max:5000,src:'Circle Digital Chart（Bugs/Melon/Genie/FLO/Vibe + Spotify KR等）',tw:'no',twLabel:'❌ 需韓國帳號'},
+    {kor:'방송+시청자위원회',zh:'放送+電視觀眾評審',p:15,max:1500,src:'MBC TV/Radio播出（10%）+ 隨機2000名電視觀眾評審（5%）',tw:'no',twLabel:'❌ 無法直接貢獻'},
+    {kor:'실시간 투표',zh:'直播節目投票',p:10,max:1000,src:'MUBEAT App全球（5%）+ SMS #0505 韓國（5%）（前3名才有資格）',tw:'partial',twLabel:'⚠️ MUBEAT可投，SMS限韓國'},
+    {kor:'음반 점수',zh:'專輯銷量',p:10,max:1000,src:'Circle Album Chart',tw:'partial',twLabel:'⚠️ 需特定通路'},
+    {kor:'SNS 동영상',zh:'SNS影片點閱',p:10,max:1000,src:'YouTube MV 點閱率（只有YouTube）',tw:'yes',twLabel:'✅ 刷YT有效'},
+    {kor:'사전 투표',zh:'事前投票',p:5,max:500,src:'MUBEAT App（全球，1票需3 Heartbeats）',tw:'yes',twLabel:'✅ 可直接參與'},
+  ],
+  preApp:'MUBEAT',preAppLogo:'mubeat',preTime:'每週二 18:00 ～ 每週四 11:00 KST',preLimit:'無限制（1票需3 Heartbeats）',
+  liveOn:true,liveApp:'MUBEAT App + SMS #0505',liveAppLogo:'mubeat',liveTime:'節目播出期間（上限5票，30 HB = 1票）',
+  cheerPlatform:'YouTube — MBCkpop 官方頻道',
+  cheerNote:'透過 YouTube「MBCkpop」直播，任何人免費觀看並留言。',
+  cheerTips:[],cheerFooter:'Show! 음악중심 含金量高，VIP 展現氣勢讓更多人看到我們的支持！',
+  tw:['可投票：MUBEAT（事前無限制 + 實時上限5票）','衝 SNS：YouTube 官方MV（佔10%）','購買實體專輯：選有 Circle Chart 通路（佔10%）'],
+},{
+  id:'ig',tabName:'人氣歌謠',day:'週日',timeKST:'15:20',timeTW:'14:20 台灣',timeNote:'',
+  name:'人氣歌謠',kor:'인기가요',nameEn:'Inkigayo',nicknames:'粉絲簡稱：인가 / 人歌 / Inkigayo',
+  ch:'SBS',chFull:'頻道：SBS（無線）｜直播：YouTube SBSKPOP（需付費會員）',
+  showLogo:'ig_logo',chLogo:'sbs',
+  color:'#ff1fa9',accentColor:'#ff1fa9',activeTextColor:'rgba(255,255,255,.95)',
+  panelBg:'#e2cbf6',panelText:'#2c0a4a',panelTextSec:'#5a3a7a',panelCardBg:'#f0e5ff',panelBorder:'#c0a0e0',panelBarBg:'#c0a0e0',
+  max:'10,000',cand:'每組可入圍兩首',absentNote:'無需到場，數據達標即可得一位',
+  hl:'視覺最前衛，反映韓國市場趨勢。音源+SNS合計高達70%，YouTube MV點閱率是最關鍵的指標。',
+  triple:'有三冠王畢業制',tripleNote:'歌曲得一位達3次即畢業。無候補時間限制，每組可同時入圍兩首。',
+  noStage:null,
+  steps:[
+    {type:'stage',emoji:'☀️',lbl:'回歸舞台\n（第0週）',sub:'5/25（週日）',fail:''},
+    {type:'vote',emoji:'🗳️',lbl:'第1輪\n事前投票',sub:'5/19(一)\n～5/23(五)',fail:''},
+    {type:'crown',emoji:'1冠',lbl:'第1次競爭\n得一位',sub:'5/25（週日）',fail:'未入前3名→淘汰'},
+    {type:'vote',emoji:'🗳️',lbl:'第2輪\n事前投票',sub:'5/26(一)\n～5/30(五)',fail:''},
+    {type:'crown',emoji:'2冠',lbl:'第2次競爭\n得一位',sub:'6/1（週日）',fail:'未入前3名→淘汰'},
+    {type:'vote',emoji:'🗳️',lbl:'第3輪\n事前投票',sub:'6/2(一)\n～6/6(五)',fail:''},
+    {type:'grad',emoji:'👑',lbl:'三冠王\n畢業！',sub:'6/8（週日）',fail:''},
+  ],
+  scores:[
+    {kor:'온라인 음원',zh:'串流音源',p:50,max:5000,src:'Melon / Genie / FLO + Circle Global K-pop（含Spotify/Apple Music等）',tw:'partial',twLabel:'⚠️ 國際平台部分算分'},
+    {kor:'SNS 점수',zh:'SNS分數',p:20,max:2000,src:'YouTube MV 點閱率（只有YouTube，無TikTok）',tw:'yes',twLabel:'✅ 刷YT最有效！'},
+    {kor:'ON-AIR 점수',zh:'ON-AIR分數',p:10,max:1000,src:'SBS TV + 廣播播出',tw:'no',twLabel:'❌ 需出演SBS'},
+    {kor:'음반 점수',zh:'專輯銷量',p:10,max:1000,src:'Circle Album Chart',tw:'partial',twLabel:'⚠️ 需特定通路'},
+    {kor:'시청자 사전투표',zh:'事前投票',p:5,max:500,src:'LiNC App（每日10票，每票30 Fan Points）',tw:'yes',twLabel:'✅ 可直接參與'},
+    {kor:'실시간 투표',zh:'實時投票',p:5,max:500,src:'Higher App（前3名才有資格，1票=50 Rubies）',tw:'yes',twLabel:'✅ 可直接參與'},
+  ],
+  preApp:'LiNC',preAppLogo:'linc',preTime:'每週一 12:00 ～ 每週五 23:59 KST',preLimit:'每日10票（每票30 Fan Points）',
+  liveOn:true,liveApp:'Higher App',liveAppLogo:'higher',liveTime:'節目播出現場（前3名，1票=50 Rubies）',
+  cheerPlatform:'YouTube — SBSKPOP 官方頻道',
+  cheerNote:'透過 YouTube「SBSKPOP」直播，觀看需付費會員。無會員者可等影片上傳後前往留言！',
+  cheerTips:['留言附上官方MV連結（SNS佔20%，引導串流最重要！）'],
+  cheerFooter:'人氣歌謠SNS佔20%，留言引導串流的力量在這個節目最關鍵！',
+  tw:['可投票（事前）：LiNC App（每日10票，每票30 Fan Points）','可投票（實時）：Higher App（前3名，節目播出時開放）','最重要：狂刷 YouTube 官方MV，SNS佔20%！'],
+}
+];
+
+const tabsEl=document.getElementById('tabs');
+const panelsEl=document.getElementById('panels');
+
+D.forEach((s,i)=>{
+  const btn=document.createElement('button');
+  btn.className='tab-btn'+(i===0?' active':'');
+  btn.innerHTML=`<span class="tab-day">${s.day}</span><span class="tab-name">${s.tabName}</span><span class="tab-time">🇹🇼 ${s.timeTW}</span>`;
+  btn.dataset.id=s.id;
+  if(i===0){btn.style.background=s.color;btn.querySelectorAll('span').forEach(el=>el.style.color=s.activeTextColor);}
+  else btn.querySelector('.tab-day').style.color=s.color;
+  tabsEl.appendChild(btn);
+
+  const T={text:s.panelText||'var(--color-text-primary)',textSec:s.panelTextSec||'var(--color-text-secondary)',cardBg:s.panelCardBg||'var(--color-background-secondary)',border:s.panelBorder||'var(--color-border-tertiary)',barBg:s.panelBarBg||'var(--color-border-tertiary)'};
+  const A=s.accentColor;
+  const maxP=Math.max(...s.scores.map(r=>r.p));
+
+  const tlHTML=s.steps.map((st,idx)=>{
+    const conn=idx>0?`<div class="tl-connector"><div class="tl-line" style="background:${T.border}"></div><div class="tl-arrow">›</div><div class="tl-line" style="background:${T.border}"></div></div>`:'';
+    const nc=st.type==='crown'||st.type==='grad'||st.type==='continue';
+    const ns=nc?`background:${s.color};border-color:${s.color}`:(st.type==='expiry'?`background:#fcebeb;border-color:#f09595;color:#a32d2d`:(s.panelBg?`background:${T.cardBg};border-color:${T.border};color:${T.textSec}`:''));
+    return `${conn}<div class="tl-item"><div class="tl-node ${st.type}" style="${ns}">${st.emoji}</div>${st.lbl?`<div class="tl-label" style="color:${T.textSec}">${st.lbl.replace(/\n/g,'<br>')}</div>`:''} ${st.sub?`<div class="tl-sublabel" style="color:${A}">${st.sub.replace(/\n/g,'<br>')}</div>`:''} ${st.fail?`<div class="tl-fail">${st.fail}</div>`:''} ${st.gradNote?`<div class="tl-gradnote" style="color:${A}">${st.gradNote}</div>`:''}</div>`;
+  }).join('');
+
+  const scoreRowsHTML=s.scores.map(r=>`<div class="score-row"><div class="sc-names"><span class="sc-kor" style="color:${T.text}">${r.kor}</span><span class="sc-zh" style="color:${T.textSec}">${r.zh}</span></div><div class="sc-bar-wrap" style="background:${T.barBg}"><div class="sc-bar" style="width:${(r.p/maxP*100).toFixed(0)}%;background:${s.color};opacity:.9"></div></div><div class="sc-pct" style="color:${A}">${r.p}%</div><div class="sc-pts" style="color:${T.textSec}">（${r.max}點）</div></div>`).join('');
+  const detailHTML=s.scores.map(r=>{
+    const twClass=r.tw==='yes'?'tw-yes':r.tw==='partial'?'tw-partial':'tw-no';
+    return `<div class="sd-row" style="background:${T.cardBg};border-color:${T.border}"><div class="sd-name" style="color:${A}">${r.kor}</div><div class="sd-src" style="color:${T.textSec}">${r.src}</div><span class="sd-tw ${twClass}">${r.twLabel}</span></div>`;
+  }).join('');
+
+  const preHTML=`<div class="vc-body"><div class="vc-text"><div class="vc-app-name" style="color:${A}">${s.preApp}</div><div class="vc-time" style="color:${T.textSec}">${s.preTime}</div><div class="vc-limit" style="color:${T.textSec}">票數：${s.preLimit}</div></div><img class="vc-app-logo" src="${L[s.preAppLogo]}" alt="${s.preApp}"></div>`;
+  const liveHTML=s.liveOn?`<div class="vc-body"><div class="vc-text"><div class="vc-app-name" style="color:${A}">${s.liveApp}</div><div class="vc-time" style="color:${T.textSec}">${s.liveTime}</div></div><img class="vc-app-logo" src="${L[s.liveAppLogo]}" alt="${s.liveApp}"></div>`:`<div class="vc-none" style="color:${T.textSec}">無</div>`;
+  const tipsHTML=s.cheerTips.length>0?`<div class="cheer-tips">${s.cheerTips.map(t=>`<div class="cheer-tip"><div class="cheer-dot" style="background:${A}"></div><div style="color:${T.text}">${t}</div></div>`).join('')}</div>`:'';
+  const nostageHTML=s.noStage?`<div style="background:${T.cardBg};border-left:4px solid ${A};border-radius:0 8px 8px 0;padding:10px 14px;font-size:15px;color:${T.text};margin-bottom:10px;line-height:1.7">⚠️ <strong>無固定回歸舞台</strong>｜${s.noStage}</div>`:'';
+  const mnetNoteHTML=s.id==='mc'?`<div class="mnet-note" style="background:${T.cardBg};border-color:${A};color:${T.text}">💡 <strong>M Countdown 特別說明：</strong>螢幕顯示的是「事前5項分數」，Mnet Plus 實時投票在現場開放後才疊加計入，最終分數會更高，這是正常現象！</div>`:'';
+
+  const panel=document.createElement('div');
+  panel.className='panel'+(i===0?' visible':'');
+  panel.id='panel-'+s.id;
+  if(s.panelBg)panel.style.background=s.panelBg;
+
+  panel.innerHTML=`
+    <div class="show-header">
+      <div class="show-logo-wrap"><img class="show-logo-img" src="${L[s.showLogo]}" alt="${s.name}"></div>
+      <div class="show-meta">
+        <h3 style="color:${T.text}">${s.name} <span style="font-size:16px;font-weight:400;color:${T.textSec}">${s.nameEn}</span></h3>
+        <div class="kor" style="color:${T.textSec}">${s.kor}</div>
+        <div class="nick" style="color:${A}">🏷️ ${s.nicknames}</div>
+        <div class="ch-line"><img class="ch-logo" src="${L[s.chLogo]}" alt="${s.ch}"><span style="color:${T.textSec}">${s.ch} ｜ ${s.day} 🇰🇷 ${s.timeKST} KST → 🇹🇼 ${s.timeTW}${s.timeNote?` (${s.timeNote})`:''}</span></div>
+      </div>
+    </div>
+    <div class="chips">
+      <div class="chip" style="background:${T.cardBg}"><div class="chip-lbl" style="color:${T.textSec}">滿分</div><div class="chip-val" style="color:${T.text}">${s.max}</div></div>
+      <div class="chip" style="background:${T.cardBg}"><div class="chip-lbl" style="color:${T.textSec}">候補曲數</div><div class="chip-val" style="color:${T.text};font-size:14px">${s.cand}</div></div>
+      <div class="chip" style="background:${T.cardBg};flex:2;min-width:200px"><div class="chip-lbl" style="color:${T.textSec}">是否需要到場演出</div><div class="chip-val" style="color:${T.text}">非必要</div><div class="chip-sub" style="color:${T.textSec}">${s.absentNote}</div></div>
+    </div>
+    <div class="hl-box" style="background:${T.cardBg};border-color:${s.color};color:${T.text}">${s.hl}</div>
+    <div class="sec">
+      <div class="sec-title" style="color:${T.text};border-color:${A}">三冠王制度</div>
+      <div class="${s.triple==='有三冠王畢業制'?'tc-badge tc-yes':'tc-badge tc-no'}">${s.triple}</div>
+      <div class="tc-note" style="color:${T.textSec}">${s.tripleNote}</div>
+      ${nostageHTML}
+      <div class="tc-ex-label" style="color:${T.textSec}">📅 以TAEYANG 5/18發行《QUINTESSENCE》為例${s.noStage?'（無回歸舞台，直接依數據計分）':'（假設每週均得一位）'}</div>
+      <div class="timeline"><div class="tl-track">${tlHTML}</div></div>
+    </div>
+    <div class="divider" style="background:${T.border}"></div>
+    <div class="sec">
+      <div class="sec-title" style="color:${T.text};border-color:${A}">各項評分配比（依節目螢幕顯示順序）</div>
+      ${mnetNoteHTML}
+      <div class="score-list">${scoreRowsHTML}</div>
+      <div class="score-detail">${detailHTML}</div>
+    </div>
+    <div class="divider" style="background:${T.border}"></div>
+    <div class="sec">
+      <div class="sec-title" style="color:${T.text};border-color:${A}">投票機制</div>
+      <div class="vote-grid">
+        <div class="vote-card" style="border-color:${T.border};background:${T.cardBg}"><div class="vc-title" style="color:${A}">事前投票</div>${preHTML}</div>
+        <div class="vote-card" style="border-color:${T.border};background:${T.cardBg}"><div class="vc-title" style="color:${A}">實時投票</div>${liveHTML}</div>
+      </div>
+    </div>
+    <div class="divider" style="background:${T.border}"></div>
+    <div class="sec">
+      <div class="sec-title" style="color:${T.text};border-color:${A}">初次舞台直播 — 直播應援留言區</div>
+      <div class="cheer-box" style="border-color:${s.color}">
+        <div class="cheer-hd" style="background:${T.cardBg}"><div class="cheer-hd-t" style="color:${A}">展現 VIP 熱情，讓大家感受到我們的氣勢！</div><div class="cheer-hd-s" style="color:${T.textSec}">不影響計分，但這是我們對偶像最直接的應援</div></div>
+        <div class="cheer-plat"><div class="cheer-plat-lbl" style="color:${T.textSec}">直播留言平台</div><div class="cheer-plat-val" style="color:${A}">${s.cheerPlatform}</div><div class="cheer-plat-note" style="color:${T.textSec}">${s.cheerNote}</div></div>
+        ${tipsHTML}
+        <div class="cheer-footer" style="border-color:${T.border};color:${T.textSec}">${s.cheerFooter}</div>
+      </div>
+    </div>
+    <div class="divider" style="background:${T.border}"></div>
+    <div class="sec">
+      <div class="sec-title" style="color:${T.text};border-color:${A}">台灣 VIP 貢獻策略</div>
+      <div class="tw-box" style="background:${T.cardBg}">${s.tw.map(t=>`<div class="tw-item"><div class="tw-dot" style="background:${A}"></div><div style="color:${T.text}">${t}</div></div>`).join('')}</div>
+    </div>
+    <div class="ch-footer" style="background:${T.cardBg};border-color:${T.border}">📺 <strong style="color:${T.text}">播出資訊</strong>｜<span style="color:${T.textSec}">${s.chFull}</span></div>
+  `;
+  panelsEl.appendChild(panel);
+});
+
+tabsEl.addEventListener('click',e=>{
+  const btn=e.target.closest('.tab-btn');if(!btn)return;
+  document.querySelectorAll('.tab-btn').forEach(b=>{b.classList.remove('active');b.style.background='';const sv=D.find(x=>x.id===b.dataset.id);b.querySelector('.tab-day').style.color=sv.color;b.querySelectorAll('.tab-name,.tab-time').forEach(el=>el.style.color='');});
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('visible'));
+  btn.classList.add('active');
+  const sv=D.find(x=>x.id===btn.dataset.id);
+  btn.style.background=sv.color;
+  btn.querySelectorAll('span').forEach(el=>el.style.color=sv.activeTextColor);
+  document.getElementById('panel-'+btn.dataset.id).classList.add('visible');
+});
+</script></body></html>
